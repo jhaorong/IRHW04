@@ -10,27 +10,27 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
         
-public class WordCount {
- public static class Map extends Mapper<LongWritable, Text, Text, IntWritable> {
+public class Sum2 {
+ public static class Map extends Mapper<LongWritable, Text, Text, LongWritable> {
     public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
         String line = value.toString();
         StringTokenizer tokenizer = new StringTokenizer(line);
         while (tokenizer.hasMoreTokens()) {
             String token = tokenizer.nextToken();
-            context.write(new Text(token), new IntWritable(1));
+            context.write(new Text("sum"), new LongWritable(Long.parseLong(token)));
         }
     }
  } 
         
- public static class Reduce extends Reducer<Text, IntWritable, Text, IntWritable> {
+ public static class Reduce extends Reducer<Text, LongWritable, Text, LongWritable> {
 
-    public void reduce(Text key, Iterable<IntWritable> values, Context context) 
+    public void reduce(Text key, Iterable<LongWritable> values, Context context) 
       throws IOException, InterruptedException {
-        int sum = 0;
-        for (IntWritable val : values) {
+        long sum = 0;
+        for (LongWritable val : values) {
             sum += val.get();
         }
-        context.write(key, new IntWritable(sum));
+        context.write(key, new LongWritable(sum));
     }
  }
         
@@ -40,11 +40,11 @@ public class WordCount {
         Job job = new Job(conf, "kooe");
     
     job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(IntWritable.class);
+    job.setOutputValueClass(LongWritable.class);
         
     job.setMapperClass(Map.class);
     job.setReducerClass(Reduce.class);
-    job.setJarByClass(WordCount.class);
+    job.setJarByClass(Sum2.class);
         
     job.setInputFormatClass(TextInputFormat.class);
     job.setOutputFormatClass(TextOutputFormat.class);
